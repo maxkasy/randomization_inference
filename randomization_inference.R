@@ -46,10 +46,9 @@ simulate_treatment = function(replication) {
         
         current_X = full_data[full_data$date == current_date, "X"]
         current_D_simulated = map_int(as.integer(current_X[[1]]),
-                                      function(x)
-                                          sample(1:k, size = 1, prob = Pactual[x, ])) %>% factor(levels = 1:k)
-        
-        
+                    function(x) sample(1:k, size = 1, prob = Pactual[x, ])) %>% 
+                factor(levels = 1:k)
+
         full_data[full_data$date == current_date, ] %<>%
             mutate(D_simulated = current_D_simulated)
         
