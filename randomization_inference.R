@@ -11,17 +11,17 @@ k = 4
 # number of MCMC draws
 RR = 10000 #50000
 # number of randomization inference replicates
-replicates = 10
+replicates = 128
 
 # merge in dates of first observation, and store merged_full_data.csv
-# merge_observed_date("2019-04-07", "2019-12-26")
+# merge_observed_date("2019-04-07", "2020-01-03")
 
 full_data =  read_csv("merged_full_data.csv") %>%
     mutate(D_simulated = factor(NA, levels = 1:k))
 
 
 start_date = "2019-02-10"
-end_date = "2019-5-16" #"2019-12-26"
+end_date = "2020-01-03"
 
 
 simulate_treatment = function(replication) {

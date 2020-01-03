@@ -26,11 +26,11 @@ p_values = function(estimator, column_name) {
     
     estimate_column = estimates[[column_name]]
     estimate_less_than_replicate = map(replicate_estimates, column_name) %>% 
-        map(function(replicate_column) replicate_column < estimate_column)
+        map(function(replicate_column) replicate_column > estimate_column)
     
     estimates$p_value = do.call(cbind, estimate_less_than_replicate) %>% 
         rowMeans()
-
+    
     return(estimates)
 }
 
@@ -71,7 +71,6 @@ weighted_means = function(data = full_data) {
         left_join(pop_numbers, by="stratum")
     
     # now do various groupings
-    
     success_by_gender=success_rates %>% 
         group_by(gender, treatment) %>% 
         summarise(success_rate=weighted.mean(avg, pop_count)) %>% 
@@ -92,18 +91,23 @@ weighted_means = function(data = full_data) {
         summarise(success_rate=weighted.mean(avg, pop_count))  %>% 
         ungroup()
     
-    list(gender = success_by_gender, 
-         nationality = success_by_nationality, 
-         education = success_by_education, 
-         experience = success_by_experience) %>% 
+    # put all the groupings in one big data frame
+    success_by_all=list(gender = success_by_gender, 
+                        nationality = success_by_nationality, 
+                        education = success_by_education, 
+                        experience = success_by_experience) %>% 
         bind_rows(.id = "grouping_variable")
+    
+    
+    # Create variable Delta by subtracting success rate for control treatment.
+    success_control = success_by_all %>% filter(treatment=="control")
+    success_control = rep(success_control[["success_rate"]], each=4)
+    success_by_all %>% 
+        mutate(Delta = success_rate - success_control)
 }
 
-# Calculate p values, for weighted means
-p_values_means = p_values(weighted_means, "success_rate")
-
-# note that this does not give confidence sets & doesn't make much sense as is
-# need to pick hypotheses to test & calculate corresponding p-values
+# Calculate p values, for Delta
+p_values_means = p_values(weighted_means, "Delta")
 
 
 
