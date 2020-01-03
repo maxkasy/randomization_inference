@@ -1,0 +1,89 @@
+---
+title: "Randomization inference results"
+author: "Maximilian Kasy"
+date: "1/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r, echo=FALSE, message=F}
+source("analyze_replicates.R")
+```
+
+# Weighted average outcomes
+
+```{r, echo=F}
+p_values_means %>% 
+    filter(grouping_variable %in% c("male", "syrian")) %>% 
+    ggplot(aes(x=treatment, y=success_rate)) + 
+    geom_point() +
+    scale_y_continuous(limits = c(0,.1), breaks=c(0,.05,.1)) +
+    coord_flip() +
+    facet_grid(covariate~grouping_variable) +
+    theme_minimal()
+
+p_values_means %>% 
+    filter(grouping_variable %in% c("above_secondary_edu", "ever_employed")) %>% 
+    ggplot(aes(x=treatment, y=success_rate)) + 
+    geom_point() +
+    scale_y_continuous(limits = c(0,.1), breaks=c(0,.05,.1)) +
+    coord_flip() +
+    facet_grid(covariate~grouping_variable) +
+    theme_minimal()
+```
+
+# Treatment effects based on weighted average outcomes
+
+```{r, echo=F}
+p_values_means %>% 
+    filter(grouping_variable %in% c("male", "syrian"),
+           treatment !="control") %>% 
+    ggplot(aes(x=treatment, y=Delta)) + 
+    geom_point() +
+    scale_y_continuous(limits = c(-.05,.05), breaks=c(-.05, 0,.05)) +
+    coord_flip() +
+    facet_grid(covariate~grouping_variable) +
+    theme_minimal()
+
+p_values_means %>% 
+    filter(grouping_variable %in% c("above_secondary_edu", "ever_employed"),
+           treatment !="control") %>% 
+    ggplot(aes(x=treatment, y=Delta)) + 
+    geom_point() +
+    scale_y_continuous(limits = c(-.05,.05), breaks=c(-.05, 0,.05)) +
+    coord_flip() +
+    facet_grid(covariate~grouping_variable) +
+    theme_minimal()
+```
+
+
+# One sided p_values testing treatment effects equal to zero
+
+```{r, echo=F}
+p_values_means %>% 
+    filter(grouping_variable %in% c("male", "syrian"),
+           treatment !="control") %>% 
+    ggplot(aes(x=treatment, y=p_value)) + 
+    geom_point() +
+    geom_hline(yintercept=.05) +
+    scale_y_continuous(limits = c(0,1), breaks=c(0,.5,1)) +
+    coord_flip() +
+    facet_grid(covariate~grouping_variable) +
+    theme_minimal()
+
+p_values_means %>% 
+    filter(grouping_variable %in% c("above_secondary_edu", "ever_employed"),
+           treatment !="control") %>% 
+    ggplot(aes(x=treatment, y=p_value)) + 
+    geom_point() +
+    geom_hline(yintercept=.05) +
+    scale_y_continuous(limits = c(0,1), breaks=c(0,.5,1)) +
+    coord_flip() +
+    facet_grid(covariate~grouping_variable) +
+    theme_minimal()
+```

@@ -4,7 +4,7 @@ library(magrittr)
 # Applying arbitrary estimator to all replicates ----  
 full_data =  read_csv("merged_full_data.csv") %>% 
     mutate(D_simulated=D)
-replicates = 1:16
+replicates = 1:128
 
 # function that applies estimator to each of the replicate datasets corresponding to indices
 list_of_estimates = function(estimator, replicates.=replicates) {
@@ -69,33 +69,37 @@ weighted_means = function(data = full_data) {
     
     success_rates= success_rates %>% 
         left_join(pop_numbers, by="stratum")
-    
+ 
     # now do various groupings
     success_by_gender=success_rates %>% 
         group_by(gender, treatment) %>% 
         summarise(success_rate=weighted.mean(avg, pop_count)) %>% 
-        ungroup()
+        ungroup() %>% 
+        mutate(covariate=as.integer(as.factor(gender))-1)
     
     success_by_nationality=success_rates %>% 
         group_by(nationality, treatment) %>% 
         summarise(success_rate=weighted.mean(avg, pop_count)) %>% 
-        ungroup() 
+        ungroup() %>% 
+        mutate(covariate=as.integer(as.factor(nationality))-1)
     
     success_by_education=success_rates %>% 
         group_by(above_secondary_edu, treatment) %>% 
         summarise(success_rate=weighted.mean(avg, pop_count)) %>% 
-        ungroup()
+        ungroup() %>% 
+        mutate(covariate=above_secondary_edu)
     
     success_by_experience=success_rates %>% 
         group_by(ever_employed, treatment) %>% 
         summarise(success_rate=weighted.mean(avg, pop_count))  %>% 
-        ungroup()
+        ungroup() %>% 
+        mutate(covariate=ever_employed)
     
     # put all the groupings in one big data frame
-    success_by_all=list(gender = success_by_gender, 
-                        nationality = success_by_nationality, 
-                        education = success_by_education, 
-                        experience = success_by_experience) %>% 
+    success_by_all=list(male = success_by_gender, 
+                        syrian = success_by_nationality, 
+                        above_secondary_edu = success_by_education, 
+                        ever_employed = success_by_experience) %>% 
         bind_rows(.id = "grouping_variable")
     
     
@@ -109,5 +113,7 @@ weighted_means = function(data = full_data) {
 # Calculate p values, for Delta
 p_values_means = p_values(weighted_means, "Delta")
 
+p_values_means %<>% 
+    select(grouping_variable, covariate, treatment, success_rate, Delta, p_value)
 
 
